@@ -5,11 +5,11 @@ from gtts import gTTS
 from openai import OpenAI
 
 
-def image_generation(text):
+def image_generation(context):
     client = OpenAI(api_key="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")
-
+    summary = summarize_document(context)
     response = client.images.generate(
-        prompt=text[:64],
+        prompt=summary[:64],
         n=1,
         size="1024x1024"
     )
@@ -36,5 +36,4 @@ def summarize_document(context):
 if __name__ == "__main__":
     docx_path = './datastore/IndvsSL.docx'
     context = extract_text_from_docx(docx_path)
-    summary = summarize_document(context)
-    image_generation(summary)
+    image_generation(context)

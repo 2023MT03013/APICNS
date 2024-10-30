@@ -4,11 +4,12 @@ import docx2txt
 from gtts import gTTS
 from openai import OpenAI
 
-def tts(text):
+def tts(context):
     client = OpenAI(api_key="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")
 
+    summary = summarize_document(context)
     # Convert the text to speech
-    tts = gTTS(text=text, lang='en')
+    tts = gTTS(text=summary, lang='en')
 
     # Save the audio file
     tts.save("output_audio.mp3")
@@ -23,6 +24,8 @@ def tts(text):
         )
 
     print("Transcribed Text:", response.text)
+    print("")
+    print("Audio File is generated and saved as: output_audio.mp3 in the current directory")
 
 def extract_text_from_docx(docx_path):
     """
@@ -44,5 +47,4 @@ def summarize_document(context):
 if __name__ == "__main__":
     docx_path = './datastore/IndvsSL.docx'
     context = extract_text_from_docx(docx_path)
-    summary = summarize_document(context)
-    print(tts(summary))
+    print(tts(context))

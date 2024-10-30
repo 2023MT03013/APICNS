@@ -21,8 +21,9 @@ def split_text_by_words(text, max_words=10):
     return chunks
 
 # Function to translate text from English to Hindi
-def translate(text):
-    chunks = split_text_by_words(text)
+def translate(context):
+    summary = summarize_document(context)
+    chunks = split_text_by_words(summary)
     translations = []
     
     for chunk in chunks:
@@ -51,5 +52,4 @@ def summarize_document(context):
 if __name__ == "__main__":
     docx_path = './datastore/IndvsSL.docx'
     context = extract_text_from_docx(docx_path)
-    summary = summarize_document(context)
-    print(translate(summary))
+    print(translate(context))
