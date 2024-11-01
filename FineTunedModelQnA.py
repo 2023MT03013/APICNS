@@ -1,4 +1,6 @@
 import time
+import model_metrics
+import mlflow
 from openai import OpenAI
 
 # Set your OpenAI API key
@@ -43,17 +45,22 @@ def create_ft_model():
     ft_model = status_response.fine_tuned_model
 
 def ask_question_with_ft(question):
-    response = client.chat.completions.create(
-        model=ft_model,
-        #prompt="Who captained the Sri Lankan team in the final?\n",
-        messages=[
-            {"role": "system", "content": "Cricket Guru us a factual cricket analytics assistant."},
-            {"role": "user", "content": question}
-        ],
-        max_tokens=50
-    )
-    #print("Model response:", response)
-    print("Model response:", response.choices[0].message.content)
+    with mlflow.start_run():
+        start_time = time.time()  # Record start time
+        response = client.chat.completions.create(
+            model=ft_model,
+            #prompt="Who captained the Sri Lankan team in the final?\n",
+            messages=[
+                {"role": "system", "content": "Cricket Guru us a factual cricket analytics assistant."},
+                {"role": "user", "content": question}
+            ],
+            max_tokens=50
+        )
+        result = response.choices[0].message.content
+
+        # log metrics
+        model_metrics.log_metrics(question, result, start_time, ft_model)
+        print("Model response:", result)
 
 def chatbot_with_ft():
     while True:
