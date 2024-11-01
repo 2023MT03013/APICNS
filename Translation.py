@@ -1,8 +1,18 @@
 from transformers import pipeline,  AutoTokenizer, AutoModelForSeq2SeqLM
 from huggingface_hub import InferenceClient
+import model_metrics
+import mlflow
 import docx2txt
+import time
+import os
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
+
+# Disable parallelism warning from Hugging Face tokenizers
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+# Set the MLflow tracking URI to 'http'
+mlflow.set_tracking_uri("http://localhost:5000")
 
 # Load the model and tokenizer
 tokenizer = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-hi")
@@ -26,11 +36,15 @@ def translate(context):
     chunks = split_text_by_words(summary)
     translations = []
     
-    for chunk in chunks:
-        translation = translator(chunk, max_length=200)[0]['translation_text']
-        translations.append(translation)
-    
-    return " ".join(translations)
+    with mlflow.start_run():
+        start_time = time.time()  # Record start time
+        for chunk in chunks:
+            translation = translator(chunk, max_length=200)[0]['translation_text']
+            translations.append(translation)
+        result = " ".join(translations)
+        # log metrics
+        model_metrics.log_metrics("translation", result, start_time, "Helsinki-NLP/opus-mt-en-hi")
+    return result
 
 def extract_text_from_docx(docx_path):
     """

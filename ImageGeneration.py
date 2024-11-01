@@ -1,20 +1,30 @@
-from transformers import pipeline,  AutoTokenizer, AutoModelForSeq2SeqLM
-from huggingface_hub import InferenceClient
 import docx2txt
+import model_metrics
+import mlflow
+import time
+
 from gtts import gTTS
 from openai import OpenAI
+from transformers import pipeline
+from huggingface_hub import InferenceClient
 
+client = OpenAI(api_key="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")
 
 def image_generation(context):
-    client = OpenAI(api_key="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")
     summary = summarize_document(context)
-    response = client.images.generate(
-        prompt=summary[:64],
-        n=1,
-        size="1024x1024"
-    )
-    image_url = response.data[0].url
-    print(image_url)
+
+    with mlflow.start_run():
+        start_time = time.time()  # Record start time
+        response = client.images.generate(
+            prompt=summary[:64],
+            n=1,
+            size="1024x1024"
+        )
+        image_url = response.data[0].url
+
+        # log metrics
+        model_metrics.log_metrics("image-generation", image_url, start_time, "openAI/DALL-E")
+        print(image_url)
 
 def extract_text_from_docx(docx_path):
     """
