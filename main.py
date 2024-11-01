@@ -35,26 +35,31 @@ def main():
         type=str,
         choices=tasks,
         required=True,
-        help="Specify the AI task to run. Options: 'QnA', 'Summarisation', 'TranslationToHindi', 'ListenToSummary', 'GenerateAnImage'"
+        help="Specify the AI task to run. Options: 'QnA', 'Summarisation', 'TranslationToHindi', 'ListenToSummary', 'GenerateAnImage', 'FineTunedModel'"
     )
     
     # Define the document path argument
     parser.add_argument(
         "-d", "--document",
         type=str,
-        required=True,
         help="Specify the path to the document file."
     )
     
     # Parse arguments
     args = parser.parse_args()
     
+    #  document required only if the task is not FineTunedModel
+    if args.task != 'FineTunedModel' and args.document is None:
+        parser.error("The --document argument is required for the selected task.")
+
+    if args.task != 'FineTunedModel':
+        context = extract_text_from_docx(args.document)
+
     # Output task and document path
     print(f"Task selected: {args.task}")
     print(f"Document path provided: {args.document}")
     
     # Logic to handle different tasks can be added here
-    context = extract_text_from_docx(args.document)
     if args.task == "QnA":
         print("Running Question and Answer task...")
         QnA.chatbot_with_document(context)
@@ -72,7 +77,7 @@ def main():
         ImageGeneration.image_generation(context)
     elif args.task == "FineTunedModel":
         print("Runing FineTunedModel...")
-        FineTunedModelQnA.chatbot(context)    
+        FineTunedModelQnA.chatbot_with_ft()
     else:
         print("Unknown task selected.")
 
