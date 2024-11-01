@@ -4,7 +4,7 @@ import json
 import os
 import docx2txt
 import argparse
-import QnA, Speech, Summarization, Translation, ImageGeneration
+import QnA, Speech, Summarization, Translation, ImageGeneration, FineTunedModelQnA
 from huggingface_hub import InferenceClient
 
 
@@ -22,7 +22,7 @@ def extract_text_from_docx(docx_path):
 
 def main():
     # Define available tasks
-    tasks = ['QnA', 'Summarisation', 'TranslationToHindi', 'ListenToSummary', 'GenerateAnImage']
+    tasks = ['QnA', 'Summarisation', 'TranslationToHindi', 'ListenToSummary', 'GenerateAnImage', 'FineTunedModel']
     
     # Create the parser
     parser = argparse.ArgumentParser(
@@ -65,11 +65,14 @@ def main():
         print("Running Translation to Hindi task...")
         print(Translation.translate(context))
     elif args.task == "ListenToSummary":
-        print("Listening to Summary...")
+        print("Running Speech Synthesis task...")
         Speech.tts(context)
     elif args.task == "GenerateAnImage":
-        print("Displaying an image...")
+        print("Runing Image Generation...")
         ImageGeneration.image_generation(context)
+    elif args.task == "FineTunedModel":
+        print("Runing FineTunedModel...")
+        FineTunedModelQnA.chatbot(context)    
     else:
         print("Unknown task selected.")
 
